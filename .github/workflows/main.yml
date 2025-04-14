@@ -15,9 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0 #fetch-depth is needed for GitVersion
+          fetch-depth: 0 # fetch-depth is needed for GitVersion
 
-      #Install and calculate the new version with GitVersion
+      # Install and calculate the new version with GitVersion
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.7
         with:
@@ -25,14 +25,14 @@ jobs:
 
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@v0.9.7
-        id: gitversion # step id used as reference for output values
+        id: gitversion
 
       - name: Display GitVersion outputs
         run: |
           echo "Version: ${{ steps.gitversion.outputs.SemVer }}"
           echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}"
 
-      #Build/pack the project
+      # Build/pack the project
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
@@ -41,7 +41,8 @@ jobs:
       - name: Build and Pack NuGet package
         run: dotnet pack Seguridad/SeguridadMW.Middleware/SeguridadMW.Middleware.csproj -p:Version='${{ steps.gitversion.outputs.SemVer }}' -c Release
 
-      - name: Upload NuGet package to GitHub
+      # SUBIR el .nupkg como artifact
+      - name: Upload NuGet Package
         uses: actions/upload-artifact@v2
         with:
           name: nugetPackage
@@ -51,14 +52,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifact
+      - name: Download packaged artifacts
         uses: actions/download-artifact@v2
         with:
           name: nugetPackage
 
-      - uses: ncipollo/release-action@v1
+      - name: Create Release
+        uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.build.outputs.Version }}
           name: Release ${{ needs.build.outputs.Version }}
-          artifacts: "nugetPackage/*"
+          artifacts: "*.nupkg"
           token: ${{ secrets.PAQUETES_TOKEN }}
