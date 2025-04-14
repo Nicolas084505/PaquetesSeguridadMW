@@ -55,7 +55,7 @@ jobs:
         run: dotnet pack ./Seguridad/SeguridadMW.Middleware/SeguridadMW.Middleware.csproj -p:Version='${{ steps.gitversion.outputs.SemVer }}' -c Release
       
       - name: Upload NuGet package to GitHub
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nugetPackage
           path: /home/runner/work/PaquetesSeguridadMW/SeguridadMW.Middleware/bin/Release/*.nupkg
