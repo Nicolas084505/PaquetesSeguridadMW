@@ -38,9 +38,11 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Build and Pack NuGet package
-        run: dotnet pack Seguridad/SeguridadMW.Middleware/SeguridadMW.Middleware.csproj -p:Version='${{ steps.gitversion.outputs.SemVer }}' -c Release
+      - name: Build Project
+        run: dotnet build Seguridad/SeguridadMW.Middleware/SeguridadMW.Middleware.csproj -c Release
 
+      - name: Pack NuGet package
+        run: dotnet pack Seguridad/SeguridadMW.Middleware/SeguridadMW.Middleware.csproj -p:Version='${{ steps.gitversion.outputs.SemVer }}' -c Release
       # SUBIR el .nupkg como artifact
       - name: Upload NuGet Package
         uses: actions/upload-artifact@v4
