@@ -1,8 +1,8 @@
-name: Action to build and publish the project as a nuget package to github package registry
+name: Action to build and publish the project as a nuget package to GitHub package registry
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # fetch-depth is needed for GitVersion
+          fetch-depth: 0 #fetch-depth is needed for GitVersion
 
       # Install and calculate the new version with GitVersion
       - name: Install GitVersion
@@ -25,7 +25,7 @@ jobs:
 
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@v0.9.7
-        id: gitversion
+        id: gitversion # step id used as reference for output values
 
       - name: Display GitVersion outputs
         run: |
@@ -43,9 +43,9 @@ jobs:
 
       - name: Pack NuGet package
         run: dotnet pack Seguridad/SeguridadMW.Middleware/SeguridadMW.Middleware.csproj -p:Version='${{ steps.gitversion.outputs.SemVer }}' -c Release
-      # SUBIR el .nupkg como artifact
-      - name: Upload NuGet Package
-        uses: actions/upload-artifact@v4
+
+      - name: Upload NuGet package to GitHub
+        uses: actions/upload-artifact@v2
         with:
           name: nugetPackage
           path: Seguridad/SeguridadMW.Middleware/bin/Release/*.nupkg
@@ -54,15 +54,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download packaged artifacts
-        uses: actions/download-artifact@v3
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
         with:
           name: nugetPackage
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1
+      - uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.build.outputs.Version }}
           name: Release ${{ needs.build.outputs.Version }}
-          artifacts: "*.nupkg"
+          artifacts: "nugetPackage/*"
           token: ${{ secrets.PAQUETES_TOKEN }}
